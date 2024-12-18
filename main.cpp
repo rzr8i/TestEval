@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdio>
 #include <climits>
+#include <ctime>
 using namespace std;
 
 typedef struct {
@@ -16,6 +17,7 @@ typedef struct {
 	string name;
 	Page page;
 	int score;
+	int rank;
 } Student;
 
 typedef struct {
@@ -36,6 +38,8 @@ int get_highest_score_idx(const Student* students, int n);
 void sort_students_by_score(Student* students, int n);
 
 Question* analyze_questions(const Student* students, const Page* base, int n, int* n_qs);
+
+const Student* get_student_by_name(const Student* students, int n, const char* name);
 
 void print_page(const Page* page);
 void print_student(const Student* s);
@@ -67,6 +71,7 @@ int main() {
 	}
 
 	delete[] qs;
+
 	return 0;
 }
 
@@ -187,6 +192,13 @@ void read_students(Student* students, Page* base, int n) {
 		calc_score(&students[i], base);
 	}
 
+	sort_students_by_score(students, n);
+	for (int i = 0; i < n; i++)
+		if (!students[i].page.is_valid)
+			students[i].rank = -1;
+		else
+			students[i].rank = i+1;
+
 	delete[] filename;
 	delete[] format;
 }
@@ -243,4 +255,61 @@ Question* analyze_questions(const Student* students, const Page* base, int n, in
 		qs[i].difficulty = qs[i].wrong_answers + qs[i].no_answers - qs[i].correct_answers;
 
 	return qs;
+}
+
+const Student* get_student_by_name(const Student* students, int n, const char* name) {
+	for (int i = 0; i < n; i++)
+		if (strcmp(students[i].name.c_str(), name) == 0)
+			return &students[i];
+
+	return nullptr;
+}
+
+bool export_as_txt(const Student* students, int n) {
+	time_t now = time(0);
+	tm* time_info = localtime(&now);
+	char filename[50];
+	strftime(filename, sizeof(filename), "Students_%Y%m%d_%H%M%S.txt", time_info);
+
+	ofstream f(filename);
+	if (!f) {
+		cerr << "Failed to open \"" << filename << "\": ";
+		cerr << strerror(errno) << endl;
+		return false;
+	}
+
+	for (int i = 0; i < n; i++) {
+		if (!students[i].page.is_valid) continue;
+		f << students[i].name << '\n';
+		f << '\t' << "Score: " << students[i].score << '\n';
+		f << '\t' << "Rank: " << students[i].rank << '\n';
+		f << '\n';
+	}
+
+	f.close();
+	return true;
+}
+
+bool export_as_csv(const Student* students, int n) {
+	time_t now = time(0);
+	tm* time_info = localtime(&now);
+	char filename[50];
+	strftime(filename, sizeof(filename), "Students_%Y%m%d_%H%M%S.csv", time_info);
+
+	ofstream f(filename);
+	if (!f) {
+		cerr << "Failed to open \"" << filename << "\": ";
+		cerr << strerror(errno) << endl;
+		return false;
+	}
+
+	f << "Name,Score,Rank\n";
+
+	for (int i = 0; i < n; i++) {
+		if (!students[i].page.is_valid) continue;
+		f << students[i].name << ',' << students[i].score << ',' <<  students[i].rank << '\n';
+	}
+
+	f.close();
+	return true;
 }
