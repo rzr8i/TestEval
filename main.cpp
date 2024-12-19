@@ -57,7 +57,7 @@ Question* analyze_questions(const Student* students, const Page* base, int n, in
 const Student* get_student_by_name(const Student* students, int n, const char* name);
 
 void print_page(const Page* page);
-void print_student(const Student* s);
+void print_student(const Student* s, bool show_page = false);
 void print_students(const Student* students, int n);
 void print_question(const Question* qs, int i);
 
@@ -182,7 +182,7 @@ void third_menu(Student* students, int n_students, const Page* base) {
         if (!s)
           cout << "\n >>> Student not found\n";
         else
-          print_student(s);
+          print_student(s, true);
       }
         break;
       case 3: {
@@ -402,13 +402,13 @@ void print_page(const Page* page) {
   }
 }
 
-void print_student(const Student* s) {
+void print_student(const Student* s, bool show_page) {
   if (!s->page.is_valid) return;
 
-  cout << s->name << '\n';
-  print_page(&s->page);
-  if (s->page.is_valid)
-    cout << "Score: " << s->score << '\n';
+  cout << s->name << " (Rank #" << s->rank << ")\n";
+  if (show_page)
+    print_page(&s->page);
+  cout << "  Score: " << s->score << '\n';
 }
 
 void print_students(const Student* students, int n) {
