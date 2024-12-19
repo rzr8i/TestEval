@@ -27,6 +27,21 @@ typedef struct {
 	int difficulty;
 } Question;
 
+void clear_screen();
+void print_header();
+void print_menu_option(int n, const char* txt);
+int get_number(int min, int max);
+int get_positive_number(const char* prompt);
+char* get_string(int size, const char* prompt);
+void pause();
+
+bool login();
+bool signup();
+
+void first_menu();
+Student* second_menu(int* n_students, Page* base);
+void third_menu(Student* students, int n_students, const Page* base);
+
 bool read_page_from_file(Student* s, const char* filename, const Page* base);
 bool read_base_page(Page* p);
 void read_students(Student* students, Page* base, int n);
@@ -44,35 +59,263 @@ const Student* get_student_by_name(const Student* students, int n, const char* n
 void print_page(const Page* page);
 void print_student(const Student* s);
 void print_students(const Student* students, int n);
+void print_question(const Question* qs, int i);
 
 bool export_as_txt(const Student* students, int n);
 bool export_as_csv(const Student* students, int n);
 
 int main() {
-	int n = 50;
-	Student* students = new Student[n];
+	first_menu();
+
+	int n_students;
 	Page base;
-	read_students(students, &base, n);
+	Student* students = second_menu(&n_students, &base);
+	
+	third_menu(students, n_students, &base);
+	return 0;
+}
 
-	print_students(students, n);
-	cout << "SORTING...\n";
-	sort_students_by_score(students, n);
-	print_students(students, n);
+void first_menu() {
+	bool success = false;
+	while (!success) {
+		clear_screen();
+		print_header();
+		print_menu_option(1, "Login");
+		print_menu_option(2, "Sign-up");
+		print_menu_option(0, "Exit");
+		int n = get_number(0, 2);
 
+		char msg[100];
 
-	int n_qs;
-	Question* qs = analyze_questions(students, &base, n, &n_qs);
+		switch (n) {
+			case 1:
+				if (login()) {
+					strcpy(msg, "Logged in successfully");
+					success = true;
+				} else {
+					strcpy(msg, "Invalid Credentials");
+					success = false;
+				}
+				break;
+			case 2:
+				if (signup()) {
+					strcpy(msg, "Account has been created successfully");
+					success = true;
+				} else {
+					strcpy(msg, "Failed to create new account");
+					success = false;
+				}
+				break;
+			case 0:
+				exit(0);
+			default:
+				assert(0 && "UNREACHABLE");
+		}
 
-	for (int i = 0; i < n_qs; i++) {
-		cout << "Question #" << i+1 << '\n';
-		cout << "\tCorrect Answers: " << qs[i].correct_answers << '\n';
-		cout << "\tWrong Answers: " << qs[i].wrong_answers << '\n';
-		cout << "\tNo Answers: " << qs[i].no_answers << '\n';
+		cout << "\n >>> " <<  msg << "\n\n";
+		pause();
+	}
+}
+
+Student* second_menu(int* n_students, Page* base) {
+	bool success = false;
+	while (!success) {
+		clear_screen();
+		print_header();
+		print_menu_option(1, "Start new analysis");
+		print_menu_option(2, "Import analysis");
+		print_menu_option(0, "Exit");
+		int n = get_number(0, 2);
+
+		switch (n) {
+			case 1:
+				*n_students = get_positive_number("Enter number of students");
+				success = true;
+				break;
+			case 2:
+				assert(0 && "Not implemented yet");
+				break;
+			case 0:
+				exit(0);
+			default:
+				assert(0 && "UNREACHABLE");
+		}
 	}
 
-	delete[] qs;
+	Student* students = new Student[*n_students];
+	read_students(students, base, *n_students);
 
-	return 0;
+	return students;
+}
+
+void third_menu(Student* students, int n_students, const Page* base) {
+	bool success = false;
+
+	sort_students_by_score(students, n_students);
+	int n_qs;
+	Question* qs = analyze_questions(students, base, n_students, &n_qs);
+
+	(void) qs;
+
+	while (!success) {
+		clear_screen();
+		print_header();
+		print_menu_option(1, "Top 3 students");
+		print_menu_option(2, "Lookup student");
+		print_menu_option(3, "Hardest question");
+		print_menu_option(4, "Easiest question");
+		print_menu_option(5, "Print all students");
+		print_menu_option(6, "Print all questions");
+		print_menu_option(7, "Export");
+		print_menu_option(0, "Exit");
+		int n = get_number(0, 7);
+
+		switch (n) {
+			case 1:
+				for (int i = 0; i < 3; i++)
+					print_student(&students[i]);
+				break;
+			case 2: {
+				cin.ignore();
+				char* name = get_string(50, "Enter student name");
+				const Student* s = get_student_by_name(students, n_students, name);
+				if (!s)
+					cout << "\n >>> Student not found\n";
+				else
+					print_student(s);
+			}
+				break;
+			case 3: {
+				int max = INT_MIN;
+				int max_idx = -1;
+
+				for (int i = 0; i < n_qs; i++)
+					if (qs[i].difficulty > max) {
+						max = qs[i].difficulty;
+						max_idx = i;
+					}
+
+				print_question(qs, max_idx);
+			}
+				break;
+			case 4: {
+				int min = INT_MAX;
+				int min_idx = -1;
+
+				for (int i = 0; i < n_qs; i++)
+					if (qs[i].difficulty < min) {
+						min = qs[i].difficulty;
+						min_idx = i;
+					}
+
+				print_question(qs, min_idx);
+			}
+				break;
+			case 5:
+				print_students(students, n_students);
+				break;
+			case 6:
+				for (int i = 0; i < n_qs; i++)
+					print_question(qs, i);
+				break;
+			case 7: {
+				print_menu_option(1, "Export as txt");
+				print_menu_option(2, "Export as csv");
+				int n = get_number(1, 2);
+				
+				if (n == 1)
+					export_as_txt(students, n_students);
+				else if (n == 2)
+					export_as_csv(students, n_students);
+				else
+					assert(0 && "UNREACHABLE");
+			}
+			break;
+			case 0:
+				exit(0);
+			default:
+				assert(0 && "UNREACHABLE");
+		}
+
+		pause();
+	}
+}
+
+bool login() {
+	clear_screen();
+	print_header();
+
+	cin.ignore();
+	char* username = get_string(30, "Enter username");;
+	char* password = get_string(30, "Enter password");;
+
+	// TODO: Read users from a file
+	return strcmp(username, "reza") == 0 && strcmp(password, "pass123") == 0;
+}
+bool signup() {
+	return false;
+}
+
+void print_header() {
+	cout << 
+	"    ______          __  ______            __\n"
+	"   /_  __/__  _____/ /_/ ____/   ______ _/ /\n"
+	"    / / / _ \\/ ___/ __/ __/ | | / / __ `/ /\n"
+	"   / / /  __(__  ) /_/ /___ | |/ / /_/ / /\n"
+	"  /_/  \\___/____/\\__/_____/ |___/\\__,_/_/\n";
+
+	cout << "    A tool for evaluating and analyzing\n";
+	cout << "         student test performance\n";
+	cout << "\n  > GitHub: rzr8i/TestEval\n";
+	cout << "----------------------------------------------\n\n";
+}
+
+void clear_screen() {
+#ifdef _WIN32
+	system("cls");
+#else
+	system("clear");
+#endif
+}
+
+void pause() {
+	cout << "\n Press Enter to continue...\n";
+	getchar();
+	cin.ignore();
+}
+
+int get_number(int min, int max) {
+	int n;
+	do {
+		cout << "\n Enter a number between " << min << " and " << max;
+		cout << "\n  > ";
+		cin >> n;
+	} while(n < min || n > max);
+	return n;
+}
+
+int get_positive_number(const char* prompt) {
+	int n;
+	do {
+		cout << "\n " << prompt;
+		cout << "\n  > ";
+		cin >> n;
+	} while(n <= 0);
+	return n;
+}
+
+char* get_string(int size, const char* prompt) {
+	char* input = new char[size];
+
+	cout << ' ' << prompt << ":\n";
+	cout << "  > ";
+	cin.getline(input, size);
+
+	return input;
+}
+
+void print_menu_option(int n, const char* txt) {
+	cout << "     (" << n << ") " << txt << "\n";
 }
 
 bool read_base_page(Page* p) {
@@ -168,6 +411,13 @@ void print_students(const Student* students, int n) {
 		print_student(&students[i]);
 		cout << '\n';
 	}
+}
+
+void print_question(const Question* qs, int i) {
+	cout << "\n Question #" << i+1 << '\n';
+	cout << "\tCorrect Answers: " << qs[i].correct_answers << '\n';
+	cout << "\tWrong Answers: " << qs[i].wrong_answers << '\n';
+	cout << "\tNo Answers: " << qs[i].no_answers << '\n';
 }
 
 void read_students(Student* students, Page* base, int n) {
@@ -286,6 +536,8 @@ bool export_as_txt(const Student* students, int n) {
 		f << '\n';
 	}
 
+	cout << " File \"" << filename << "\" saved\n";
+
 	f.close();
 	return true;
 }
@@ -309,6 +561,8 @@ bool export_as_csv(const Student* students, int n) {
 		if (!students[i].page.is_valid) continue;
 		f << students[i].name << ',' << students[i].score << ',' <<  students[i].rank << '\n';
 	}
+
+	cout << " File \"" << filename << "\" saved\n";
 
 	f.close();
 	return true;
