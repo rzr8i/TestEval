@@ -346,6 +346,9 @@ bool read_page_from_file(Student* s, const char* filename, const Page* base) {
 	if (!file) {
 		cerr << "Failed to open \"" << filename << "\": ";
 		cerr << strerror(errno) << endl;
+
+		s->page.is_valid = false;
+
 		return false;
 	}
 
@@ -400,6 +403,8 @@ void print_page(const Page* page) {
 }
 
 void print_student(const Student* s) {
+	if (!s->page.is_valid) return;
+
 	cout << s->name << '\n';
 	print_page(&s->page);
 	if (s->page.is_valid)
@@ -408,6 +413,7 @@ void print_student(const Student* s) {
 
 void print_students(const Student* students, int n) {
 	for (int i = 0; i < n; i++) {
+		if (!students[i].page.is_valid) continue;
 		print_student(&students[i]);
 		cout << '\n';
 	}
@@ -438,7 +444,9 @@ void read_students(Student* students, Page* base, int n) {
 
 	for (int i = 0; i < n; i++) {
 		sprintf(filename, format, i+1);
-		assert(read_page_from_file(&students[i], (base_path+filename).c_str(), base));
+		if (!read_page_from_file(&students[i], (base_path+filename).c_str(), base)) {
+			students[i].page.is_valid = false;
+		}
 		calc_score(&students[i], base);
 	}
 
@@ -508,9 +516,11 @@ Question* analyze_questions(const Student* students, const Page* base, int n, in
 }
 
 const Student* get_student_by_name(const Student* students, int n, const char* name) {
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < n; i++) {
+		if (!students[i].page.is_valid) continue;
 		if (strcmp(students[i].name.c_str(), name) == 0)
 			return &students[i];
+	}
 
 	return nullptr;
 }
