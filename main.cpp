@@ -172,7 +172,7 @@ void third_menu(Student* students, int n_students, const Page* base) {
 
     switch (n) {
       case 1:
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; students[i].rank <= 3; i++)
           print_student(&students[i]);
         break;
       case 2: {
@@ -450,15 +450,29 @@ void read_students(Student* students, Page* base, int n) {
     calc_score(&students[i], base);
   }
 
+  delete[] filename;
+  delete[] format;
+
   sort_students_by_score(students, n);
+
+  if (!students[0].page.is_valid)
+    return;
+
+  int rank = 1;
+  int prev_score = students[0].score;
+
   for (int i = 0; i < n; i++)
     if (!students[i].page.is_valid)
       students[i].rank = -1;
-    else
-      students[i].rank = i+1;
+    else {
+      if (students[i].score == prev_score)
+        students[i].rank = rank;
+      else
+        students[i].rank = ++rank;
 
-  delete[] filename;
-  delete[] format;
+      prev_score = students[i].score;
+    }
+
 }
 
 void swap(Student* a, Student* b) {
