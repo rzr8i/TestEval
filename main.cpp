@@ -118,29 +118,10 @@ void first_menu() {
 }
 
 Student* second_menu(int* n_students, Page* base) {
-  bool success = false;
-  while (!success) {
-    clear_screen();
-    print_header();
-    print_menu_option(1, "Start new analysis");
-    print_menu_option(2, "Import analysis");
-    print_menu_option(0, "Exit");
-    int n = get_number(0, 2);
+  clear_screen();
+  print_header();
 
-    switch (n) {
-      case 1:
-        *n_students = get_positive_number("Enter number of students");
-        success = true;
-        break;
-      case 2:
-        assert(0 && "Not implemented yet");
-        break;
-      case 0:
-        exit(0);
-      default:
-        assert(0 && "UNREACHABLE");
-    }
-  }
+  *n_students = get_positive_number("Enter number of students");
 
   Student* students = new Student[*n_students];
   read_students(students, base, *n_students);
