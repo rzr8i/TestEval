@@ -149,15 +149,11 @@ Student* second_menu(int* n_students, Page* base) {
 }
 
 void third_menu(Student* students, int n_students, const Page* base) {
-  bool success = false;
-
   sort_students_by_score(students, n_students);
   int n_qs;
   Question* qs = analyze_questions(students, base, n_students, &n_qs);
 
-  (void) qs;
-
-  while (!success) {
+  while (1) {
     clear_screen();
     print_header();
     print_menu_option(1, "Top 3 students");
