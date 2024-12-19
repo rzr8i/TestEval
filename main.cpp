@@ -172,7 +172,7 @@ void third_menu(Student* students, int n_students, const Page* base) {
 
     switch (n) {
       case 1:
-        for (int i = 0; students[i].rank <= 3; i++)
+        for (int i = 0; students[i].page.is_valid && students[i].rank <= 3; i++)
           print_student(&students[i]);
         break;
       case 2: {
@@ -362,18 +362,31 @@ bool read_page_from_file(Student* s, const char* filename, const Page* base) {
 
   getline(file, s->name, '\n');
 
-  s->page.answers = new int[100];
-  s->page.answers_size = 0;
+  int pos = file.tellg();
   int n;
+  int lines = 0;
+
+  while (file >> n)
+    lines++;
+
+  if (lines != base->answers_size) {
+    s->page.answers_size = 0;
+    s->page.is_valid = false;
+    file.close();
+    return false;
+  }
+
+  file.clear();
+  file.seekg(pos);
+
+  s->page.answers = new int[lines];
+  s->page.answers_size = 0;
 
   while (file >> n)
     s->page.answers[s->page.answers_size++] = n;
 
-  s->page.is_valid = s->page.answers_size == base->answers_size;
-  if (!s->page.is_valid) {
-    delete[] s->page.answers;
-    s->page.answers_size = 0;
-  }
+  assert(s->page.answers_size == base->answers_size);
+  s->page.is_valid = true;
 
   file.close();
   return true;
