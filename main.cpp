@@ -327,10 +327,18 @@ bool read_base_page(Page* p) {
     cerr << strerror(errno) << endl;
     return false;
   }
-
-  p->answers = new int[100];
-  p->answers_size = 0;
+  
+  int lines = 0;
   int n;
+
+  while (file >> n)
+    lines++;
+
+  file.clear();
+  file.seekg(0);
+
+  p->answers = new int[lines];
+  p->answers_size = 0;
   while (file >> n)
     p->answers[p->answers_size++] = n;
 
