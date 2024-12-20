@@ -223,14 +223,87 @@ bool login() {
   print_header();
 
   cin.ignore();
-  char* username = get_string(30, "Enter username");;
-  char* password = get_string(30, "Enter password");;
+  char* inp_user = get_string(30, "Enter username");;
+  char* inp_pass = get_string(30, "Enter password");;
 
-  // TODO: Read users from a file
-  return strcmp(username, "reza") == 0 && strcmp(password, "pass123") == 0;
+  ifstream file("users.txt");
+
+  if (!file) {
+    cerr << "Failed to open \"users.txt\": ";
+    cerr << strerror(errno) << endl;
+
+    return false;
+  }
+
+  char user[30];
+  char pass[30];
+
+  while (!file.eof()) {
+    file >> user;
+    file >> pass;
+
+    if (strcmp(user, inp_user) == 0 && strcmp(pass, inp_pass) == 0) {
+      file.close();
+      return true;
+    }
+  }
+  file.close();
+  return false;
 }
 bool signup() {
-  return false;
+  clear_screen();
+  print_header();
+
+  cin.ignore();
+  char* inp_user = get_string(30, "Enter username");;
+  char* inp_pass = get_string(30, "Enter password");;
+
+  if (strlen(inp_pass) == 0 || strlen(inp_pass) == 0) {
+    cout << "\nInvalid username\n";
+    return false;
+  }
+
+  for (size_t i = 0; i < strlen(inp_user); i++)
+    if (!isalpha(inp_user[i])) {
+      cout << "\nInvalid username\n";
+      return false;
+    }
+
+  for (size_t i = 0; i < strlen(inp_pass); i++)
+    if (!(isalnum(inp_pass[i]) || ispunct(inp_pass[i]))) {
+      cout << "\nInvalid password\n";
+      return false;
+    }
+
+  fstream file("users.txt", ios::app | ios::in);
+
+  if (!file) {
+    cerr << "Failed to open \"users.txt\": ";
+    cerr << strerror(errno) << endl;
+
+    return false;
+  }
+
+  file.seekg(0);
+
+  char user[30];
+  char pass[30];
+
+  while (!file.eof()) {
+    file >> user;
+    file >> pass;
+
+    if (strcmp(user, inp_user) == 0) {
+      file.close();
+      return false;
+    }
+  }
+
+  file.clear();
+  file << inp_user << ' ' << inp_pass << '\n';
+  file.flush();
+  file.close();
+  return true;
 }
 
 void print_header() {
