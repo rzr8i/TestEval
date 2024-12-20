@@ -7,6 +7,11 @@
 #include <ctime>
 using namespace std;
 
+#define MAX_NAME_LENGTH 50
+#define MAX_USER_LENGTH 30
+#define MAX_PASSWORD_LENGTH 30
+#define MAX_FILENAME_LENGTH 50
+
 typedef struct {
   int* answers;
   int answers_size;
@@ -154,7 +159,7 @@ void third_menu(Student* students, int n_students, const Page* base) {
         break;
       case 2: {
         cin.ignore();
-        char* name = get_string(50, "Enter student name");
+        char* name = get_string(MAX_NAME_LENGTH, "Enter student name");
         const Student* s = get_student_by_name(students, n_students, name);
         if (!s)
           cout << "\n >>> Student not found\n";
@@ -223,8 +228,8 @@ bool login() {
   print_header();
 
   cin.ignore();
-  char* inp_user = get_string(30, "Enter username");;
-  char* inp_pass = get_string(30, "Enter password");;
+  char* inp_user = get_string(MAX_USER_LENGTH, "Enter username");;
+  char* inp_pass = get_string(MAX_PASSWORD_LENGTH, "Enter password");;
 
   ifstream file("users.txt");
 
@@ -235,8 +240,8 @@ bool login() {
     return false;
   }
 
-  char user[30];
-  char pass[30];
+  char user[MAX_USER_LENGTH];
+  char pass[MAX_PASSWORD_LENGTH];
 
   while (!file.eof()) {
     file >> user;
@@ -255,8 +260,8 @@ bool signup() {
   print_header();
 
   cin.ignore();
-  char* inp_user = get_string(30, "Enter username");;
-  char* inp_pass = get_string(30, "Enter password");;
+  char* inp_user = get_string(MAX_USER_LENGTH, "Enter username");;
+  char* inp_pass = get_string(MAX_PASSWORD_LENGTH, "Enter password");;
 
   if (strlen(inp_pass) == 0 || strlen(inp_pass) == 0) {
     cout << "\nInvalid username\n";
@@ -286,8 +291,8 @@ bool signup() {
 
   file.seekg(0);
 
-  char user[30];
-  char pass[30];
+  char user[MAX_USER_LENGTH];
+  char pass[MAX_PASSWORD_LENGTH];
 
   while (!file.eof()) {
     file >> user;
@@ -613,7 +618,7 @@ const Student* get_student_by_name(const Student* students, int n, const char* n
 bool export_as_txt(const Student* students, int n) {
   time_t now = time(0);
   tm* time_info = localtime(&now);
-  char filename[50];
+  char filename[MAX_FILENAME_LENGTH];
   strftime(filename, sizeof(filename), "Students_%Y%m%d_%H%M%S.txt", time_info);
 
   ofstream f(filename);
@@ -640,7 +645,7 @@ bool export_as_txt(const Student* students, int n) {
 bool export_as_csv(const Student* students, int n) {
   time_t now = time(0);
   tm* time_info = localtime(&now);
-  char filename[50];
+  char filename[MAX_FILENAME_LENGTH];
   strftime(filename, sizeof(filename), "Students_%Y%m%d_%H%M%S.csv", time_info);
 
   ofstream f(filename);
