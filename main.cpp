@@ -52,9 +52,9 @@ string my_hash(const char* txt);
 bool login();
 bool signup();
 
-void first_menu();
-Student* second_menu(int* n_students, Page* base);
-void third_menu(Student* students, int n_students, const Page* base);
+void authentication_menu();
+Student* init_students(int* n_students, Page* base);
+void main_menu(Student* students, int n_students, const Page* base);
 
 bool read_page_from_file(Student* s, const char* filename, const Page* base);
 bool read_base_page(Page* p);
@@ -79,17 +79,17 @@ bool export_as_txt(const Student* students, int n);
 bool export_as_csv(const Student* students, int n);
 
 int main() {
-  first_menu();
+  authentication_menu();
 
   int n_students;
   Page base;
-  Student* students = second_menu(&n_students, &base);
+  Student* students = init_students(&n_students, &base);
   
-  third_menu(students, n_students, &base);
+  main_menu(students, n_students, &base);
   return 0;
 }
 
-void first_menu() {
+void authentication_menu() {
   bool success = false;
   while (!success) {
     clear_screen();
@@ -131,7 +131,7 @@ void first_menu() {
   }
 }
 
-Student* second_menu(int* n_students, Page* base) {
+Student* init_students(int* n_students, Page* base) {
   clear_screen();
   print_header();
 
@@ -156,7 +156,7 @@ Student* second_menu(int* n_students, Page* base) {
   return students;
 }
 
-void third_menu(Student* students, int n_students, const Page* base) {
+void main_menu(Student* students, int n_students, const Page* base) {
   sort_students_by_score(students, n_students);
   int n_qs;
   Question* qs = analyze_questions(students, base, n_students, &n_qs);
