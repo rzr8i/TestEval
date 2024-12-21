@@ -19,7 +19,7 @@ for (i, d) in enumerate(data):
         for a in d['answers']:
             f.write(str(a)+'\n')
 
-with open("./data/base.txt", "w") as f:
+with open("./data/Base.txt", "w") as f:
     for i in range(0, num_of_qs):
         f.write(str(randint(1, 4)))
         f.write('\n')

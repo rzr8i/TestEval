@@ -10,6 +10,10 @@
 #include <cstdint>
 using namespace std;
 
+#define DATA_DIRECTORY "./data/"
+#define BASE_FILE_PATH (DATA_DIRECTORY "Base.txt")
+#define USERS_FILE "users.txt"
+
 #define MAX_NAME_LENGTH 50
 #define MAX_USER_LENGTH 30
 #define MAX_PASSWORD_LENGTH 30
@@ -236,10 +240,10 @@ bool login() {
   char* inp_user = get_string(MAX_USER_LENGTH, "Enter username");
   char* inp_pass = get_string(MAX_PASSWORD_LENGTH, "Enter password");
 
-  ifstream file("users.txt");
+  ifstream file(USERS_FILE);
 
   if (!file) {
-    cerr << "Failed to open \"users.txt\": ";
+    cerr << "Failed to open \"" << USERS_FILE << "\": ";
     cerr << strerror(errno) << endl;
 
     return false;
@@ -285,10 +289,10 @@ bool signup() {
       return false;
     }
 
-  fstream file("users.txt", ios::app | ios::in);
+  fstream file(USERS_FILE, ios::app | ios::in);
 
   if (!file) {
-    cerr << "Failed to open \"users.txt\": ";
+    cerr << "Failed to open \"" << USERS_FILE << "\": ";
     cerr << strerror(errno) << endl;
 
     return false;
@@ -379,7 +383,7 @@ void print_menu_option(int n, const char* txt) {
 }
 
 bool read_base_page(Page* p) {
-  string filename = "./data/base.txt";
+  string filename = BASE_FILE_PATH;
   ifstream file(filename);
 
   if (!file) {
@@ -515,7 +519,7 @@ void read_students(Student* students, Page* base, int n) {
     tmp /= 10;
   }
 
-  string base_path = "./data/";
+  string base_path = DATA_DIRECTORY;
   char* filename = new char[4+digits+4+1];
   char* format = new char[20];
 
