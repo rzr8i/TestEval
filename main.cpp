@@ -223,16 +223,25 @@ void third_menu(Student* students, int n_students, const Page* base) {
           print_question(qs, i);
         break;
       case 7: {
+        clear_screen();
+        print_header();
         print_menu_option(1, "Export as txt");
         print_menu_option(2, "Export as csv");
-        int n = get_number(1, 2);
+        print_menu_option(0, "Cancel");
+        int n = get_number(0, 2);
         
-        if (n == 1)
-          export_as_txt(students, n_students);
-        else if (n == 2)
-          export_as_csv(students, n_students);
-        else
-          assert(0 && "UNREACHABLE");
+        switch (n) {
+          case 1:
+            export_as_txt(students, n_students);
+            break;
+          case 2:
+            export_as_csv(students, n_students);
+            break;
+          case 0:
+            continue;
+          default:
+            assert(0 && "UNREACHABLE");
+        }
       }
       break;
       case 0:
