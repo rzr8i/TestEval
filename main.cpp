@@ -140,6 +140,19 @@ Student* second_menu(int* n_students, Page* base) {
   Student* students = new Student[*n_students];
   read_students(students, base, *n_students);
 
+  bool no_valid_student = true;
+  for (int i = 0; i < *n_students; i++)
+    if (students[i].page.is_valid) {
+      no_valid_student = false;
+      break;
+    }
+
+  if (no_valid_student) {
+    delete[] students;
+    cerr << " >>> Couldn't load any of the files" << endl;
+    exit(1);
+  }
+
   return students;
 }
 
