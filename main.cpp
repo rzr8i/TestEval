@@ -1,15 +1,19 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <cassert>
 #include <cstdio>
 #include <climits>
 #include <ctime>
+#include <cstdint>
 using namespace std;
 
 #define MAX_NAME_LENGTH 50
 #define MAX_USER_LENGTH 30
 #define MAX_PASSWORD_LENGTH 30
+#define MAX_HASHED_PASSWORD_LENGTH 100
 #define MAX_FILENAME_LENGTH 50
 
 typedef struct {
@@ -40,6 +44,7 @@ int get_positive_number(const char* prompt);
 char* get_string(int size, const char* prompt);
 void pause();
 
+string my_hash(const char* txt);
 bool login();
 bool signup();
 
@@ -228,8 +233,8 @@ bool login() {
   print_header();
 
   cin.ignore();
-  char* inp_user = get_string(MAX_USER_LENGTH, "Enter username");;
-  char* inp_pass = get_string(MAX_PASSWORD_LENGTH, "Enter password");;
+  char* inp_user = get_string(MAX_USER_LENGTH, "Enter username");
+  char* inp_pass = get_string(MAX_PASSWORD_LENGTH, "Enter password");
 
   ifstream file("users.txt");
 
@@ -241,13 +246,13 @@ bool login() {
   }
 
   char user[MAX_USER_LENGTH];
-  char pass[MAX_PASSWORD_LENGTH];
+  char pass[MAX_HASHED_PASSWORD_LENGTH];
 
   while (!file.eof()) {
     file >> user;
     file >> pass;
 
-    if (strcmp(user, inp_user) == 0 && strcmp(pass, inp_pass) == 0) {
+    if (strcmp(user, inp_user) == 0 && strcmp(pass, my_hash(inp_pass).c_str()) == 0) {
       file.close();
       return true;
     }
@@ -292,7 +297,7 @@ bool signup() {
   file.seekg(0);
 
   char user[MAX_USER_LENGTH];
-  char pass[MAX_PASSWORD_LENGTH];
+  char pass[MAX_HASHED_PASSWORD_LENGTH];
 
   while (!file.eof()) {
     file >> user;
@@ -305,7 +310,7 @@ bool signup() {
   }
 
   file.clear();
-  file << inp_user << ' ' << inp_pass << '\n';
+  file << inp_user << ' ' << my_hash(inp_pass) << '\n';
   file.flush();
   file.close();
   return true;
@@ -666,4 +671,35 @@ bool export_as_csv(const Student* students, int n) {
 
   f.close();
   return true;
+}
+
+string my_hash(const char* txt) {
+  uint32_t o[] = {
+    0x68212253, 0x6a232448, 0x60252639, 0x5a272826,
+    0x7d292a4d, 0x5c2b2c38, 0x7b2d2e78, 0x492f3a35,
+    0x273b3c7c, 0x713d3e3e, 0x773f403f, 0x635b5c4b,
+    0x515d5e5d, 0x455f605f, 0x4a7b7c55, 0x3d7d7e59,
+    0x62293032, 0x2a313221, 0x72333425, 0x6135365e,
+    0x3137384e, 0x3c394175, 0x4042436c, 0x7a444544,
+    0x33464741, 0x2948496d, 0x224a4b42, 0x654c4d3a,
+    0x2f4e4f52, 0x2850516f, 0x73525354, 0x36545529,
+    0x43565769, 0x5b585950, 0x6b5a6123, 0x5862632b,
+    0x56646567, 0x2c66674f, 0x6668692d, 0x306a6b79,
+    0x476c6d74, 0x466e6f24, 0x64707157, 0x70727337,
+    0x3474754c, 0x3b767776, 0x2e78797e, 0x6e7a0a0d
+  };
+  stringstream r;
+  int len = strlen(txt);
+  for (int i = 0; i < len; i++) {
+    uint32_t *j = o;
+    while (1) {
+      for (int k = 16; k > 4; k>>=1)
+        if (!(*(txt+i) - ((*j>>k)&0xff)))
+          r << setfill('0') << setw(3) << hex << (((*j>>((k-8)*3))&0xff)-0x21)*len;
+
+      if ((*(j++)&0xff) == '\r')
+        break;
+    }
+  }
+  return r.str();
 }
