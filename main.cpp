@@ -55,6 +55,7 @@ bool signup();
 void authentication_menu();
 Student* init_students(int* n_students, Page* base);
 void main_menu(Student* students, int n_students, const Page* base);
+bool export_menu(const Student* students, int n_students);
 
 bool read_page_from_file(Student* s, const char* filename, const Page* base);
 bool read_base_page(Page* p);
@@ -222,28 +223,10 @@ void main_menu(Student* students, int n_students, const Page* base) {
         for (int i = 0; i < n_qs; i++)
           print_question(qs, i);
         break;
-      case 7: {
-        clear_screen();
-        print_header();
-        print_menu_option(1, "Export as txt");
-        print_menu_option(2, "Export as csv");
-        print_menu_option(0, "Cancel");
-        int n = get_number(0, 2);
-        
-        switch (n) {
-          case 1:
-            export_as_txt(students, n_students);
-            break;
-          case 2:
-            export_as_csv(students, n_students);
-            break;
-          case 0:
-            continue;
-          default:
-            assert(0 && "UNREACHABLE");
-        }
-      }
-      break;
+      case 7:
+        if (!export_menu(students, n_students))
+          continue;
+        break;
       case 0:
         exit(0);
       default:
@@ -252,6 +235,30 @@ void main_menu(Student* students, int n_students, const Page* base) {
 
     pause();
   }
+}
+
+bool export_menu(const Student* students, int n_students) {
+  clear_screen();
+  print_header();
+  print_menu_option(1, "Export as txt");
+  print_menu_option(2, "Export as csv");
+  print_menu_option(0, "Cancel");
+  int n = get_number(0, 2);
+
+  switch (n) {
+    case 1:
+      export_as_txt(students, n_students);
+      break;
+    case 2:
+      export_as_csv(students, n_students);
+      break;
+    case 0:
+      return false;
+    default:
+      assert(0 && "UNREACHABLE");
+  }
+
+  return true;
 }
 
 bool login() {
