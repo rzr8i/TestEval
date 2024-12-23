@@ -152,6 +152,7 @@ Student* init_students(int* n_students, Page* base) {
   if (no_valid_student) {
     delete[] students;
     cerr << " >>> Couldn't load any of the files" << endl;
+    pause();
     exit(1);
   }
 
@@ -561,7 +562,10 @@ void read_students(Student* students, Page* base, int n) {
 
   sprintf(format, "file%%0%dd.txt", digits);
 
-  assert(read_base_page(base));
+  if (!read_base_page(base)) {
+    pause();
+    exit(1);
+  }
 
   for (int i = 0; i < n; i++) {
     sprintf(filename, format, i+1);
