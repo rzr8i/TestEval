@@ -409,6 +409,7 @@ char* get_string(int size, const char* prompt) {
   cout << ' ' << prompt << ":\n";
   cout << "  > ";
   cin.getline(input, size);
+  cout << '\n';
 
   return input;
 }
@@ -528,16 +529,16 @@ void print_student(const Student* s, bool show_page) {
   if (!s->page.is_valid) return;
 
   cout << s->name << " (Rank #" << s->rank << ")\n";
+  cout << "Score: " << s->score << '\n';
   if (show_page)
     print_page(&s->page);
-  cout << "  Score: " << s->score << '\n';
+  cout << '\n';
 }
 
 void print_students(const Student* students, int n) {
   for (int i = 0; i < n; i++) {
     if (!students[i].page.is_valid) continue;
     print_student(&students[i]);
-    cout << '\n';
   }
 }
 
