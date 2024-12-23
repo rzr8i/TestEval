@@ -8,6 +8,7 @@
 #include <climits>
 #include <ctime>
 #include <cstdint>
+#include <cstring>
 using namespace std;
 
 #define DATA_DIRECTORY "./data/"
@@ -453,9 +454,8 @@ bool read_page_from_file(Student* s, const char* filename, const Page* base) {
     return false;
   }
 
-  getline(file, s->name, '\n');
+  getline(file, s->name);
 
-  int pos = file.tellg();
   int n;
   int lines = 0;
 
@@ -470,10 +470,13 @@ bool read_page_from_file(Student* s, const char* filename, const Page* base) {
   }
 
   file.clear();
-  file.seekg(pos);
+  file.seekg(0);
 
   s->page.answers = new int[lines];
   s->page.answers_size = 0;
+
+  std::string tmp;
+  getline(file, tmp);
 
   while (file >> n)
     s->page.answers[s->page.answers_size++] = n;
