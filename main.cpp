@@ -373,9 +373,13 @@ void clear_screen() {
 }
 
 void pause() {
+#ifdef _WIN32
+  system("pause");
+#else
   cout << "\n Press Enter to continue...\n";
   getchar();
   cin.ignore();
+#endif
 }
 
 int get_number(int min, int max) {
